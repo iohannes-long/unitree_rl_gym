@@ -8,7 +8,7 @@ import torch
 import yaml
 from ros_msg import RosMsg
 from mujoco_data import MujocoData
-
+from threading import Thread, Lock
 
 def get_gravity_orientation(quaternion):
     qw = quaternion[0]
@@ -66,6 +66,13 @@ def update_robot(simulation_dt, counter, d, target_dof_pos, action,
     
     return target_dof_pos, action
 
+def viewer_sync(viewer, locker, viewer_dt):
+    while viewer.is_running():
+        locker.acquire()
+        viewer.sync()
+        locker.release()
+        time.sleep(viewer_dt)
+
 
 if __name__ == "__main__":
     # get config file name from command line
@@ -80,7 +87,6 @@ if __name__ == "__main__":
         policy_path = config["policy_path"].replace("{LEGGED_GYM_ROOT_DIR}", LEGGED_GYM_ROOT_DIR)
         xml_path = config["xml_path"].replace("{LEGGED_GYM_ROOT_DIR}", LEGGED_GYM_ROOT_DIR)
 
-        simulation_duration = config["simulation_duration"]
         simulation_dt = config["simulation_dt"]
         control_decimation = config["control_decimation"]
 
@@ -118,16 +124,19 @@ if __name__ == "__main__":
     ros_msg = RosMsg()
     BODY_NAME = 'pelvis'
     with mujoco.viewer.launch_passive(m, d) as viewer:
-        # Close the viewer automatically after simulation_duration wall-seconds.
-        start = time.time()
-        while viewer.is_running() and time.time() - start < simulation_duration:
+        locker = Lock()
+        thread_viewer_sync = Thread(target=viewer_sync, args=(viewer, locker, simulation_dt,), daemon=True)
+        thread_viewer_sync.start()
+        while viewer.is_running():
             step_start = time.time()
             
             tau = pd_control(target_dof_pos, d.qpos[7:], kps, np.zeros_like(kds), d.qvel[6:], kds)
             d.ctrl[:] = tau
             # mj_step can be replaced with code that also evaluates
             # a policy and applies a control signal before stepping the physics.
+            locker.acquire()
             mujoco.mj_step(m, d)
+            locker.release()
 
             counter += 1
             if counter % control_decimation == 0:
@@ -138,9 +147,6 @@ if __name__ == "__main__":
                 posi = MujocoData.get_position(d, BODY_NAME)
                 quat = MujocoData.get_quat(d, BODY_NAME)
                 ros_msg.sent_pose(posi, quat)
-
-            # Pick up changes to the physics state, apply perturbations, update options from GUI.
-            viewer.sync()
 
             # Rudimentary time keeping, will drift relative to wall clock.
             time_until_next_step = m.opt.timestep - (time.time() - step_start)
