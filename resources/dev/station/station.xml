@@ -1,11 +1,11 @@
 <mujoco model="station_description">
 
   <asset>
-    <mesh name="station" file="meshes/untitled_ok.stl"/>
+    <mesh name="station" file="meshes/substation.stl"/>
   </asset>
 
   <worldbody>
-    <body name="station" pos="0 8 0">
+    <body name="station" pos="0 8 0.1">
       <geom type="mesh" mesh="station" />
     </body>
   </worldbody>

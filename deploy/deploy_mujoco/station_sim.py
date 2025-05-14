@@ -6,6 +6,8 @@ import numpy as np
 from legged_gym import LEGGED_GYM_ROOT_DIR
 import torch
 import yaml
+from ros_msg import RosMsg
+from mujoco_data import MujocoData
 
 
 def get_gravity_orientation(quaternion):
@@ -112,7 +114,9 @@ if __name__ == "__main__":
 
     # load policy
     policy = torch.jit.load(policy_path)
-
+    
+    ros_msg = RosMsg()
+    BODY_NAME = 'pelvis'
     with mujoco.viewer.launch_passive(m, d) as viewer:
         # Close the viewer automatically after simulation_duration wall-seconds.
         start = time.time()
@@ -131,6 +135,9 @@ if __name__ == "__main__":
                                                       num_actions, default_angles, cmd, 
                                                       dof_pos_scale, dof_vel_scale, ang_vel_scale,
                                                       cmd_scale, action_scale)
+                posi = MujocoData.get_position(d, BODY_NAME)
+                quat = MujocoData.get_quat(d, BODY_NAME)
+                ros_msg.sent_pose(posi, quat)
 
             # Pick up changes to the physics state, apply perturbations, update options from GUI.
             viewer.sync()
