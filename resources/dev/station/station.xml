@@ -1,21 +1,12 @@
 <mujoco model="station_description">
-  <compiler angle="radian" meshdir="meshes/"/>
-
-  <statistic meansize="0.144785" extent="1.23314" center="0.025392 2.0634e-05 -0.245975"/>
-  <default>
-    <joint damping="0.001" armature="0.01" frictionloss="0.1"/>
-  </default>
 
   <asset>
-    <mesh name="station_all" file="station_all.STL"/>
+    <mesh name="station" file="meshes/untitled_ok.stl"/>
   </asset>
 
   <worldbody>
-    <body name="station" pos="0 0 1.05">
-      <inertial pos="0.0097494 0.00167425 0.174644" quat="0.999936 -0.00259707 -0.0109997 -7.79805e-05" mass="29.847" diaginertia="1.32807 0.960733 0.53795"/>
-      <joint name="station_floating_base_joint" type="free" limited="false" actuatorfrclimited="false"/>
-      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.1 0.1 0.1 1" mesh="station_all"/>
-      </body>
+    <body name="station" pos="0 8 0">
+      <geom type="mesh" mesh="station" />
     </body>
   </worldbody>
 </mujoco>

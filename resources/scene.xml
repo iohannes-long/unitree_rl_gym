@@ -1,6 +1,6 @@
 <mujoco model="station sim scene">
-  <include file="robots/h1/h1.xml"/>
-  <!-- <include file="dev/station/station.xml"/> -->
+  <!-- <include file="robots/h1/h1.xml"/> -->
+  <include file="dev/station/station.xml"/>
 
   <statistic center="1.0 0.7 1.0" extent="0.8"/>
   
