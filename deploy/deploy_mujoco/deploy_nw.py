@@ -134,7 +134,7 @@ if __name__ == "__main__":
                 target_dof_pos = action * action_scale + default_angles
 
                 # send ros msg
-                # send_ros_msg(d, 'pelvis', ros_msg)
+                send_ros_msg(d, 'pelvis', ros_msg)
 
             # Pick up changes to the physics state, apply perturbations, update options from GUI.
             viewer.sync()

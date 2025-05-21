@@ -1,5 +1,5 @@
 <mujoco model="h1_description">
-  <compiler angle="radian" meshdir="meshes/"/>
+  <compiler angle="radian"/>
 
   <statistic meansize="0.144785" extent="1.23314" center="0.025392 2.0634e-05 -0.245975"/>
   <default>
@@ -7,27 +7,27 @@
   </default>
 
   <asset>
-    <mesh name="pelvis" file="pelvis.STL"/>
-    <mesh name="left_hip_yaw_link" file="left_hip_yaw_link.STL"/>
-    <mesh name="left_hip_roll_link" file="left_hip_roll_link.STL"/>
-    <mesh name="left_hip_pitch_link" file="left_hip_pitch_link.STL"/>
-    <mesh name="left_knee_link" file="left_knee_link.STL"/>
-    <mesh name="left_ankle_link" file="left_ankle_link.STL"/>
-    <mesh name="right_hip_yaw_link" file="right_hip_yaw_link.STL"/>
-    <mesh name="right_hip_roll_link" file="right_hip_roll_link.STL"/>
-    <mesh name="right_hip_pitch_link" file="right_hip_pitch_link.STL"/>
-    <mesh name="right_knee_link" file="right_knee_link.STL"/>
-    <mesh name="right_ankle_link" file="right_ankle_link.STL"/>
-    <mesh name="torso_link" file="torso_link.STL"/>
-    <mesh name="left_shoulder_pitch_link" file="left_shoulder_pitch_link.STL"/>
-    <mesh name="left_shoulder_roll_link" file="left_shoulder_roll_link.STL"/>
-    <mesh name="left_shoulder_yaw_link" file="left_shoulder_yaw_link.STL"/>
-    <mesh name="left_elbow_link" file="left_elbow_link.STL"/>
-    <mesh name="right_shoulder_pitch_link" file="right_shoulder_pitch_link.STL"/>
-    <mesh name="right_shoulder_roll_link" file="right_shoulder_roll_link.STL"/>
-    <mesh name="right_shoulder_yaw_link" file="right_shoulder_yaw_link.STL"/>
-    <mesh name="right_elbow_link" file="right_elbow_link.STL"/>
-    <mesh name="logo_link" file="logo_link.STL"/>
+    <mesh name="pelvis" file="meshes/pelvis.STL"/>
+    <mesh name="left_hip_yaw_link" file="meshes/left_hip_yaw_link.STL"/>
+    <mesh name="left_hip_roll_link" file="meshes/left_hip_roll_link.STL"/>
+    <mesh name="left_hip_pitch_link" file="meshes/left_hip_pitch_link.STL"/>
+    <mesh name="left_knee_link" file="meshes/left_knee_link.STL"/>
+    <mesh name="left_ankle_link" file="meshes/left_ankle_link.STL"/>
+    <mesh name="right_hip_yaw_link" file="meshes/right_hip_yaw_link.STL"/>
+    <mesh name="right_hip_roll_link" file="meshes/right_hip_roll_link.STL"/>
+    <mesh name="right_hip_pitch_link" file="meshes/right_hip_pitch_link.STL"/>
+    <mesh name="right_knee_link" file="meshes/right_knee_link.STL"/>
+    <mesh name="right_ankle_link" file="meshes/right_ankle_link.STL"/>
+    <mesh name="torso_link" file="meshes/torso_link.STL"/>
+    <mesh name="left_shoulder_pitch_link" file="meshes/left_shoulder_pitch_link.STL"/>
+    <mesh name="left_shoulder_roll_link" file="meshes/left_shoulder_roll_link.STL"/>
+    <mesh name="left_shoulder_yaw_link" file="meshes/left_shoulder_yaw_link.STL"/>
+    <mesh name="left_elbow_link" file="meshes/left_elbow_link.STL"/>
+    <mesh name="right_shoulder_pitch_link" file="meshes/right_shoulder_pitch_link.STL"/>
+    <mesh name="right_shoulder_roll_link" file="meshes/right_shoulder_roll_link.STL"/>
+    <mesh name="right_shoulder_yaw_link" file="meshes/right_shoulder_yaw_link.STL"/>
+    <mesh name="right_elbow_link" file="meshes/right_elbow_link.STL"/>
+    <mesh name="logo_link" file="meshes/logo_link.STL"/>
   </asset>
 
   <worldbody>

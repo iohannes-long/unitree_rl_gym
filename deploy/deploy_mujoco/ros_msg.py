@@ -20,7 +20,7 @@ class RosMsg:
                 self._pub_pose.publish(pose_msg)
             except queue.Empty:
                 pass
-            time.sleep(0.1)
+            time.sleep(0.01)
                 
     def sent_pose(self, position_xyz, quaternion_xyzw):
         posi_x, posi_y, posi_z = position_xyz

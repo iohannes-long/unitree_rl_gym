@@ -1,13 +1,13 @@
 # 
 policy_path: "{LEGGED_GYM_ROOT_DIR}/deploy/pre_train/h1/motion.pt"
-xml_path: "{LEGGED_GYM_ROOT_DIR}/resources/robots/h1/scene.xml"
+xml_path: "{LEGGED_GYM_ROOT_DIR}/resources/scene.xml"
 
 # Total simulation time
 simulation_duration: 60.0
 # Simulation time step
-simulation_dt: 0.005
+simulation_dt: 0.01
 # Controller update frequency (meets the requirement of simulation_dt * controll_decimation=0.02; 50Hz)
-control_decimation: 4
+control_decimation: 2
 
 kps: [150, 150, 150, 200, 40,  150, 150, 150, 200, 40]
 kds: [2, 2, 2, 4, 2,  2, 2, 2, 4, 2]
