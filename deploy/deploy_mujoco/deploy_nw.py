@@ -8,6 +8,7 @@ import torch
 import yaml
 from ros_msg import RosMsg
 from mujoco_data import MujocoData
+import glfw
 
 
 def get_gravity_orientation(quaternion):
@@ -29,10 +30,70 @@ def pd_control(target_q, q, kp, target_dq, dq, kd):
     """Calculates torques from position commands"""
     return (target_q - q) * kp + (target_dq - dq) * kd
 
-def send_ros_msg(d, body_name, ros_msg):
+def send_pose_msg(d, body_name, ros_msg):
     posi = MujocoData.get_position(d, body_name)
     quat = MujocoData.get_quat(d, body_name)
     ros_msg.sent_pose(posi, quat)
+
+class CameraViewer(object):
+    def __init__(self):
+        self.window = None
+        self.context = None
+        self.camera = None
+
+def _get_camera_viewer(m, camera_name):
+    camera_viewer = CameraViewer()
+    glfw.window_hint(glfw.VISIBLE, glfw.FALSE)
+    camera_viewer.window = glfw.create_window(320, 240, "camera_viewer", None, None)
+    if not camera_viewer.window:
+        glfw.terminate()
+        raise RuntimeError("Failed to create GLFW window for left camera")
+    glfw.make_context_current(camera_viewer.window)
+    camera_viewer.context = mujoco.MjrContext(m, mujoco.mjtFontScale.mjFONTSCALE_100)
+    camera_viewer.camera = mujoco.MjvCamera()
+    camera_viewer.camera.fixedcamid = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_CAMERA, camera_name)
+    if camera_viewer.camera.fixedcamid < 0:
+        raise ValueError(f"Camera '{camera_name}' not found in model")
+    camera_viewer.camera.type = mujoco.mjtCamera.mjCAMERA_FIXED
+    return camera_viewer
+
+def _get_camera_image(m, d, camera_viewer):
+    width, height = glfw.get_window_size(camera_viewer.window)
+    scene = mujoco.MjvScene(m, maxgeom=1000)
+
+    # 创建图像缓冲区
+    img = np.zeros((height, width, 3), dtype=np.uint8)  # RGB 图像
+    depth = np.zeros((height, width), dtype=np.float32)  # 深度图像
+
+    # 渲染图像
+    viewport = mujoco.MjrRect(0, 0, width, height)
+    mujoco.mjv_updateScene(m, d, mujoco.MjvOption(), None, camera_viewer.camera, mujoco.mjtCatBit.mjCAT_ALL, scene)
+    mujoco.mjr_render(viewport, scene, camera_viewer.context)    
+    img = np.zeros((height, width, 3), dtype=np.uint8)
+    mujoco.mjr_readPixels(img, None, viewport, camera_viewer.context)
+
+    # 处理深度数据
+    depth_min = 0.1  # 最近深度（单位：米）
+    depth_max = 10.0  # 最远深度（单位：米）
+    depth = depth_min + (depth_max - depth_min) * (1 - depth)
+
+    return depth
+
+def send_cloud_msg(m, d, camera_viewer, ros_msg):
+    depth = _get_camera_image(m, d, camera_viewer)    
+    width, height = glfw.get_window_size(camera_viewer.window)
+
+    # 生成点云
+    pointcloud = []
+    for v in range(height):
+        for u in range(width):
+            z = depth[v, u]
+            if z > 0:
+                x = (u - width / 2) * z / 100  # 假设焦距为 100
+                y = (v - height / 2) * z / 100  # 假设焦距为 100
+                pointcloud.append([x, y, z])
+    cloud = np.array(pointcloud)
+    print(cloud)
 
 
 if __name__ == "__main__":
@@ -89,6 +150,8 @@ if __name__ == "__main__":
     ros_msg = RosMsg()
 
     with mujoco.viewer.launch_passive(m, d) as viewer:
+        camera_viewer = _get_camera_viewer(m, 'depth_camera')
+
         # Close the viewer automatically after simulation_duration wall-seconds.
         start = time.time()
         while viewer.is_running() and time.time() - start < simulation_duration:
@@ -134,7 +197,8 @@ if __name__ == "__main__":
                 target_dof_pos = action * action_scale + default_angles
 
                 # send ros msg
-                send_ros_msg(d, 'pelvis', ros_msg)
+                send_pose_msg(d, 'pelvis', ros_msg)
+                send_cloud_msg(m, d, camera_viewer, ros_msg)
 
             # Pick up changes to the physics state, apply perturbations, update options from GUI.
             viewer.sync()
