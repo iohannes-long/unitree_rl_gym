@@ -31,11 +31,14 @@ def pd_control(target_q, q, kp, target_dq, dq, kd):
 if __name__ == "__main__":
     # get config file name from command line
     import argparse
+    import os
 
     parser = argparse.ArgumentParser()
     parser.add_argument("config_file", type=str, help="config file name in the config folder")
     args = parser.parse_args()
     config_file = args.config_file
+    LEGGED_GYM_ROOT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
+    print(LEGGED_GYM_ROOT_DIR)
     with open(f"{LEGGED_GYM_ROOT_DIR}/deploy/deploy_mujoco/configs/{config_file}", "r") as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
         policy_path = config["policy_path"].replace("{LEGGED_GYM_ROOT_DIR}", LEGGED_GYM_ROOT_DIR)
