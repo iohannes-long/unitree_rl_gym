@@ -7,6 +7,7 @@ from queue import Queue
 import mujoco
 import numpy as np
 import cv2
+from deep_to_cloud import DeepToCloud
 
 
 class StatusOp:
@@ -42,7 +43,7 @@ class StatusOp:
         ros_msg.send_pose(posi, quat)
 
     def _get_camera_renderer(self, m):
-        renderer = mujoco.Renderer(m)
+        renderer = mujoco.Renderer(m, 480, 640)
         renderer.enable_depth_rendering()
         return renderer
 
@@ -74,5 +75,7 @@ class StatusOp:
         return depth_img
 
     def _send_cloud_msg(self, renderer, camera_id, d, ros_msg):
-        depth = self._get_depth_image(renderer, camera_id, d)
-        # ros_msg.send_cloud(depth)
+        depth_img = self._get_depth_image(renderer, camera_id, d)
+        points = DeepToCloud.get_3d_point(depth_img, renderer.width, renderer.height)
+        intensity = depth_img.flatten()[depth_img.flatten() > 0]
+        ros_msg.send_cloud(points, intensity)

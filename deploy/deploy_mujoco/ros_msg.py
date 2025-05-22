@@ -2,9 +2,10 @@ import rospy
 from geometry_msgs.msg import PoseStamped, Point, Quaternion
 import threading
 import queue
-from sensor_msgs.msg import PointCloud2
-from sensor_msgs import point_cloud2
-from std_msgs.msg import Header
+from sensor_msgs.msg import PointCloud2, PointField
+import rospy
+import numpy as np
+
 
 class RosMsg:
     def __init__(self):
@@ -42,14 +43,26 @@ class RosMsg:
         pose_msg.pose.orientation = Quaternion(x=quat_x, y=quat_y, z=quat_z, w=quat_w)
         self._queue_pose.put(pose_msg)
 
-    def send_cloud(self, np_points):
-        header = Header()
-        header.stamp = rospy.Time.now()
-        header.frame_id = 'map'
-        fields = [
-            point_cloud2.PointField(name='x', offset=0, datatype=point_cloud2.PointField.FLOAT32, count=1),
-            point_cloud2.PointField(name='y', offset=4, datatype=point_cloud2.PointField.FLOAT32, count=1),
-            point_cloud2.PointField(name='z', offset=8, datatype=point_cloud2.PointField.FLOAT32, count=1)
+    def send_cloud(self, points, intensity):
+        msg = PointCloud2()
+        msg.header.stamp = rospy.Time.now()
+        msg.header.frame_id = self._FRAME_ID
+        msg.height = 1
+        msg.width = len(points)
+        msg.fields = [
+            PointField(name='x', offset=0, datatype=PointField.FLOAT32, count=1),
+            PointField(name='y', offset=4, datatype=PointField.FLOAT32, count=1),
+            PointField(name='z', offset=8, datatype=PointField.FLOAT32, count=1),
+            PointField(name='intensity', offset=12, datatype=PointField.FLOAT32, count=1)
         ]
-        cloud_msg = point_cloud2.create_cloud(header, fields, np_points)
-        self._queue_cloud.put(cloud_msg)
+        msg.is_bigendian = False
+        msg.point_step = 16  # 每个点占用16字节（x, y, z, intensity）
+        msg.row_step = msg.point_step * msg.width
+        msg.is_dense = False
+
+        # 将点云和强度信息打包到字节流中
+        points_with_intensity = np.zeros((len(points), 4), dtype=np.float32)
+        points_with_intensity[:, :3] = points
+        points_with_intensity[:, 3] = intensity
+        msg.data = points_with_intensity.tobytes()
+        self._queue_cloud.put(msg)
