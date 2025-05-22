@@ -44,10 +44,15 @@ class StatusOp:
 
     def _get_camera_renderer(self, m):
         renderer = mujoco.Renderer(m, 480, 640)
-        renderer.enable_depth_rendering()
         return renderer
+    
+    def _get_rgb_image(self, renderer, camera_id, d):
+        renderer.update_scene(d, camera=camera_id)
+        rgb = renderer.render()
+        return rgb
 
     def _get_depth_image(self, renderer, camera_id, d):
+        renderer.enable_depth_rendering()
         renderer.update_scene(d, camera=camera_id)
         depth = renderer.render()
 
@@ -66,16 +71,19 @@ class StatusOp:
         pixels = 255 * np.clip(depth, 0, 1)
 
         depth_img = pixels.astype(np.uint8)
-
-        cv2.namedWindow("H1 Cameras", cv2.WINDOW_AUTOSIZE | cv2.WINDOW_GUI_NORMAL)
-        cv2.moveWindow("H1 Cameras", 1100, 0)            
-        cv2.imshow("H1 Cameras", depth_img)
-        cv2.waitKey(1)
+        renderer.disable_depth_rendering()
 
         return depth_img
 
     def _send_cloud_msg(self, renderer, camera_id, d, ros_msg):
+        rgb_img = self._get_rgb_image(renderer, camera_id, d)
         depth_img = self._get_depth_image(renderer, camera_id, d)
-        points = DeepToCloud.get_3d_point(depth_img, renderer.width, renderer.height)
+
+        cv2.namedWindow("H1 Cameras", cv2.WINDOW_AUTOSIZE | cv2.WINDOW_GUI_NORMAL)
+        cv2.moveWindow("H1 Cameras", 1100, 0)            
+        cv2.imshow("H1 Cameras", rgb_img)
+        cv2.waitKey(1)
+
+        pcd = DeepToCloud.get_pcd(rgb_img, depth_img)
         intensity = depth_img.flatten()[depth_img.flatten() > 0]
-        ros_msg.send_cloud(points, intensity)
+        ros_msg.send_cloud(pcd.points, intensity)
