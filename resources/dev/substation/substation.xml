@@ -1,19 +1,11 @@
-<mujoco model="h1_description">
-  <compiler angle="radian"/>
-
-  <statistic meansize="0.144785" extent="1.23314" center="0.025392 2.0634e-05 -0.245975"/>
-  <default>
-    <joint damping="0.001" armature="0.01" frictionloss="0.1"/>
-  </default>
-
+<mujoco model="m_substation_1">
   <asset>
-    <mesh name="untitled0521_3" file="meshes/untitled0521_3.stl"/>
+    <mesh name="substation" file="meshes/untitled0521_3.stl"/>
+    <material name="metal_gray" rgba="0.5 0.5 0.5 1" specular="0.5" shininess="0.5" />
   </asset>
-
   <worldbody>
-    <body name="dev" pos="0 2 0">
-      <inertial pos="0.0097494 0.00167425 0.174644" quat="0.999936 -0.00259707 -0.0109997 -7.79805e-05" mass="29.847" diaginertia="1.32807 0.960733 0.53795"/>
-      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="untitled0521_3"/>
+    <body name="substation_body" pos="3 0 0" childclass="substation">
+        <geom type="mesh" mesh="substation" material="metal_gray" class="substation_visual"/>
     </body>
   </worldbody>
 </mujoco>

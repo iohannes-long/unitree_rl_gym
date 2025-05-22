@@ -6,10 +6,12 @@ import time
 from queue import Queue
 import mujoco
 import numpy as np
+import cv2
 
 
 class CameraViewer(object):
     def __init__(self):
+        self.name = None
         self.window = None
         self.context = None
         self.camera = None
@@ -43,10 +45,11 @@ class StatusOp:
     def _send_pose_msg(self, d, body_name, ros_msg):
         posi = MujocoData.get_position(d, body_name)
         quat = MujocoData.get_quat(d, body_name)
-        ros_msg.sent_pose(posi, quat)
+        ros_msg.send_pose(posi, quat)
 
     def _get_camera_viewer(self, m, camera_name):
         camera_viewer = CameraViewer()
+        camera_viewer.name = camera_name
         glfw.window_hint(glfw.VISIBLE, glfw.FALSE)
         camera_viewer.window = glfw.create_window(640, 480, "camera_viewer", None, None)
         if not camera_viewer.window:
@@ -62,6 +65,9 @@ class StatusOp:
         return camera_viewer
 
     def _get_camera_image(self, m, d, camera_viewer):
+        if not camera_viewer.window:
+            glfw.terminate()
+            raise RuntimeError(f"Failed to create GLFW window for {camera_viewer.name} camera")
         width, height = glfw.get_window_size(camera_viewer.window)
         scene = mujoco.MjvScene(m, maxgeom=1000)
 
@@ -81,6 +87,11 @@ class StatusOp:
         depth_max = 10.0  # 最远深度（单位：米）
         depth = depth_min + (depth_max - depth_min) * (1 - depth)
 
+        cv2.namedWindow("H1 Cameras", cv2.WINDOW_AUTOSIZE | cv2.WINDOW_GUI_NORMAL)
+        cv2.moveWindow("H1 Cameras", 1100, 0)            
+        cv2.imshow("H1 Cameras", img)
+        cv2.waitKey(1)
+
         return img, depth
 
     def _send_cloud_msg(self, m, d, camera_viewer, ros_msg):
@@ -97,4 +108,4 @@ class StatusOp:
                     y = (v - height / 2) * z / 100  # 假设焦距为 100
                     pointcloud.append([x, y, z])
         cloud = np.array(pointcloud)
-        print(cloud)
+        ros_msg.send_cloud(cloud)

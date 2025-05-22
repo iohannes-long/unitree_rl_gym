@@ -4,6 +4,18 @@
 
   <statistic center="1.0 0.7 1.0" extent="0.8"/>
 
+  <default>
+    <joint damping="0.001" armature="0.01" frictionloss="0.1"/>
+
+    <!-- substation start -->
+    <default class="substation">
+      <default class="substation_visual">
+        <geom type="mesh" contype="0" conaffinity="0" group="2"/>
+      </default>
+    </default>
+    <!-- substation end -->
+  </default>
+
   <visual>
     <headlight diffuse="0.6 0.6 0.6" ambient="0.1 0.1 0.1" specular="0.9 0.9 0.9"/>
     <rgba haze="0.15 0.25 0.35 1"/>
@@ -19,7 +31,6 @@
   <worldbody>
     <light pos="1 0 3.5" dir="0 0 -1" directional="true"/>
     <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
-    <camera name="depth_camera" pos="0 0 2" quat="0.707 0 0.707 0" fovy="45"/>
   </worldbody>
 
 </mujoco>
