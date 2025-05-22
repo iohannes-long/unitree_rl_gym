@@ -197,8 +197,8 @@ if __name__ == "__main__":
                 target_dof_pos = action * action_scale + default_angles
 
                 # send ros msg
-                send_pose_msg(d, 'pelvis', ros_msg)
-                send_cloud_msg(m, d, camera_viewer, ros_msg)
+                # send_pose_msg(d, 'pelvis', ros_msg)
+                # send_cloud_msg(m, d, camera_viewer, ros_msg)
 
             # Pick up changes to the physics state, apply perturbations, update options from GUI.
             viewer.sync()
